@@ -13,7 +13,10 @@ class Const:
     START_SCREEN = 0
     GAME_RUNNING = 1
     GAME_OVER = 2
+    LEADERBOARD_SCREEN = 3
     # image files
     BIRD = 'asset/bird.png'
     GROUND = 'asset/ground.png'
     BACKGROUND = 'asset/background.png'
+    LEADERBOARD_FILE = "asset/leaderboard.txt"
+    

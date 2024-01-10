@@ -4,6 +4,7 @@ from objects.pipe import Pipe
 from objects.ground import Ground
 from constants import Const
 
+
 # Initialize Pygame
 pygame.init()
 
@@ -39,6 +40,25 @@ ground = Ground(0, Const.HEIGHT - Const.GROUND_HEIGHT, ground_image)
 
 # Score
 score = 0
+
+
+# Leaderboard
+leaderboard = []
+
+
+def load_leaderboard():
+    try:
+        with open(Const.LEADERBOARD_FILE, "r") as file:
+            lines = file.readlines()
+            leaderboard.extend([int(line.strip()) for line in lines])
+    except FileNotFoundError:
+        pass
+
+def save_leaderboard():
+    with open(Const.LEADERBOARD_FILE, "w") as file:
+        for entry in leaderboard:
+            file.write(f"{entry}\n")
+
 
 def draw_objects():
     screen.blit(background_image, (0, 0))
@@ -76,6 +96,52 @@ def draw_end_screen():
     restart_text = font.render("Press SPACE to Restart", True, (255, 255, 255))
     restart_rect = restart_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT * 2 // 3))
     screen.blit(restart_text, restart_rect)
+    leaderboard_text = font.render("Press L to View Leaderboard", True, (255, 255, 255))
+    leaderboard_rect = leaderboard_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT - 50))
+    screen.blit(leaderboard_text, leaderboard_rect)
+
+def draw_leaderboard():
+    screen.blit(background_image, (0, 0))
+    leaderboard_title_text = big_font.render("Leaderboard", True, (255, 255, 255))
+    leaderboard_title_rect = leaderboard_title_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT // 6))
+    screen.blit(leaderboard_title_text, leaderboard_title_rect)
+
+    y_position = Const.HEIGHT // 4  # Set initial y position
+
+    for i, entry in enumerate(leaderboard, start=1):
+        entry_text = font.render(f"{i}. {entry}", True, (255, 255, 255))
+        entry_rect = entry_text.get_rect(center=(Const.WIDTH // 2, y_position))
+        screen.blit(entry_text, entry_rect)
+
+        y_position += 30  # Move to the next row
+
+  
+    back_text = font.render("Press L to Go Back", True, (255, 255, 255))
+    back_rect = back_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT - 50))
+    screen.blit(back_text, back_rect)
+
+def update_leaderboard():
+    # Save the score to the leaderboard
+    global leaderboard
+    leaderboard.append(score)
+    leaderboard.sort(reverse=True)  # Sort in descending order
+    if len(leaderboard) > 5:
+        leaderboard = leaderboard[:7]  # Keep only the top 5 scores
+
+    leaderboard_text = font.render("Press L to View Leaderboard", True, (255, 255, 255))
+    leaderboard_rect = leaderboard_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT - 50))
+    screen.blit(leaderboard_text, leaderboard_rect)
+
+    restart_text = font.render("Press SPACE to Restart", True, (255, 255, 255))
+    restart_rect = restart_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT * 2 // 3))
+    screen.blit(restart_text, restart_rect)
+
+    # Save the updated leaderboard
+    save_leaderboard()
+
+
+# Load leaderboard on program start
+load_leaderboard()
 
 
 
@@ -85,7 +151,9 @@ pygame.display.set_caption("Flappy Bird")
 
 # Set up the clock
 clock = pygame.time.Clock()
+
 # Game loop
+leaderboard_updated = False  # Add this line to initialize the variable
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -98,11 +166,20 @@ while True:
                 bird.rect.y = Const.HEIGHT // 2
                 pipes = []
                 score = 0
+                leaderboard_updated = False  # Reset the leaderboard update flag
                 bird.jump()
 
             elif game_state == Const.GAME_RUNNING:
                 # Jump only when the game is running
                 bird.jump()
+
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_l:
+            if game_state == Const.GAME_OVER:
+                game_state = Const.LEADERBOARD_SCREEN
+            elif game_state == Const.LEADERBOARD_SCREEN:
+                game_state = Const.GAME_OVER
+              
+
 
     if game_state == Const.START_SCREEN:
         draw_start_screen()
@@ -136,8 +213,22 @@ while True:
         # Draw objects
         draw_objects()
 
+   # elif game_state == Const.GAME_OVER:
+  #      draw_end_screen()
+   #     update_leaderboard()
+
     elif game_state == Const.GAME_OVER:
-        draw_end_screen()
+      draw_end_screen()
+      if not leaderboard_updated:  # Add a flag to track if leaderboard is already updated
+          update_leaderboard()  # Call the update_leaderboard function
+          leaderboard_updated = True  # Set the flag to True
+    
+
+
+
+    elif game_state == Const.LEADERBOARD_SCREEN:
+        draw_leaderboard()
+
 
     # Update the display
     pygame.display.flip()
