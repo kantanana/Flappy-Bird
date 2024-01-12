@@ -30,9 +30,9 @@ bird = Bird(Const.WIDTH // 4, Const.HEIGHT // 2, bird_image, Const.BIRD_SIZE, Co
 
 # Pipes
 pipes = []
-pipe_gap = 150
+pipe_gap = 180
 pipe_speed = 5
-pipe_frequency = 60
+pipe_frequency = 150
 pipe_counter = 0
 
 # Ground
@@ -115,7 +115,7 @@ def draw_leaderboard():
 
         y_position += 30  # Move to the next row
 
-  
+
     back_text = font.render("Press L to Go Back", True, (255, 255, 255))
     back_rect = back_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT - 50))
     screen.blit(back_text, back_rect)
@@ -126,7 +126,7 @@ def update_leaderboard():
     leaderboard.append(score)
     leaderboard.sort(reverse=True)  # Sort in descending order
     if len(leaderboard) > 5:
-        leaderboard = leaderboard[:7]  # Keep only the top 5 scores
+        leaderboard = leaderboard[:12]  # Keep only the top 12 scores
 
     leaderboard_text = font.render("Press L to View Leaderboard", True, (255, 255, 255))
     leaderboard_rect = leaderboard_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT - 50))
@@ -154,7 +154,16 @@ clock = pygame.time.Clock()
 
 # Game loop
 leaderboard_updated = False  # Add this line to initialize the variable
+score = 0
+diff = 0
 while True:
+
+    if (score - diff) >= (100):
+        pipe_gap -= 5
+        pipe_speed += 0.1
+        pipe_frequency -= 3
+        diff = score
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -178,7 +187,7 @@ while True:
                 game_state = Const.LEADERBOARD_SCREEN
             elif game_state == Const.LEADERBOARD_SCREEN:
                 game_state = Const.GAME_OVER
-              
+
 
 
     if game_state == Const.START_SCREEN:
@@ -222,7 +231,7 @@ while True:
       if not leaderboard_updated:  # Add a flag to track if leaderboard is already updated
           update_leaderboard()  # Call the update_leaderboard function
           leaderboard_updated = True  # Set the flag to True
-    
+
 
 
 
