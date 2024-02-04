@@ -8,7 +8,8 @@ class Const:
     GRAVITY = 0.3
     JUMP_STRENGTH = -5.5
     PIPE_WIDTH = 50
-    PIPE_COLOR = (0, 255, 0)  # Green
+    PIPE_COLOR = (80, 250, 100)  # Green
+    PIPE_END_COLOR = (70, 240, 90)  # Darker Green
     # Game states
     START_SCREEN = 0
     GAME_RUNNING = 1
@@ -19,4 +20,3 @@ class Const:
     GROUND = 'asset/ground.png'
     BACKGROUND = 'asset/background.png'
     LEADERBOARD_FILE = "asset/leaderboard.txt"
-
