@@ -3,6 +3,7 @@ from objects.bird import Bird
 from objects.pipe import Pipe
 from objects.ground import Ground
 from constants import Const
+import time as t
 
 
 # Initialize Pygame
@@ -88,7 +89,7 @@ def draw_start_screen():
     start_rect = start_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT // 3))
     screen.blit(start_text, start_rect)
 
-    instruction_text = font.render("Press SPACE to Start", True, (255, 255, 255))
+    instruction_text = font.render("Press R to Start", True, (255, 255, 255))
     instruction_rect = instruction_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT // 2))
     screen.blit(instruction_text, instruction_rect)
 
@@ -102,7 +103,7 @@ def draw_end_screen():
     score_rect = score_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT - 450))
     screen.blit(score_text, score_rect)
 
-    restart_text = font.render("Press SPACE to Restart", True, (255, 255, 255))
+    restart_text = font.render("Press R to Restart", True, (255, 255, 255))
     restart_rect = restart_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT - 320))
     screen.blit(restart_text, restart_rect)
     leaderboard_text = font.render("Press L to View Leaderboard", True, (255, 255, 255))
@@ -149,7 +150,7 @@ def update_leaderboard():
     leaderboard_rect = leaderboard_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT - 50))
     screen.blit(leaderboard_text, leaderboard_rect)
 
-    restart_text = font.render("Press SPACE to Restart", True, (255, 255, 255))
+    restart_text = font.render("Press R to Restart", True, (255, 255, 255))
     restart_rect = restart_text.get_rect(center=(Const.WIDTH // 2, Const.HEIGHT * 2 // 3))
     screen.blit(restart_text, restart_rect)
 
@@ -170,26 +171,35 @@ while True:
 
     if (score - diff) >= (100):
         pipe_gap -= 5
-        pipe_speed += 0.1
-        pipe_frequency -= 3
+        pipe_speed += 0.2
+        if pipe_frequency > 80:
+            pipe_frequency -= 3
         diff = score
 
     for event in pygame.event.get():
+
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            if game_state == Const.GAME_RUNNING:
+                # Jump only when the game is running
+                bird.jump()
+
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
             if game_state == Const.START_SCREEN or game_state == Const.GAME_OVER:
                 # Start or restart the game
                 game_state = Const.GAME_RUNNING
                 bird.rect.y = Const.HEIGHT // 2
                 pipes = []
                 score = 0
+                pipe_gap = 180
+                pipe_speed = 5
+                pipe_frequency = 150
+                pipe_counter = 0
+                diff = 0
                 leaderboard_updated = False  # Reset the leaderboard update flag
-                bird.jump()
-
-            elif game_state == Const.GAME_RUNNING:
-                # Jump only when the game is running
                 bird.jump()
 
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_l:
@@ -197,8 +207,6 @@ while True:
                 game_state = Const.LEADERBOARD_SCREEN
             elif game_state == Const.LEADERBOARD_SCREEN:
                 game_state = Const.GAME_OVER
-
-
 
     if game_state == Const.START_SCREEN:
         draw_start_screen()
